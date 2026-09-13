@@ -21,8 +21,6 @@ public abstract class NearbyFeature {
         this.distanceM = distanceM;
     }
 
-    public abstract double computeRisk();
-
     public String getName() { return name; }
     public double getDistanceM() { return distanceM; }
 }

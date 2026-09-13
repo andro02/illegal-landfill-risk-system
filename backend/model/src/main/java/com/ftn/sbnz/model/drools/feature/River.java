@@ -8,11 +8,6 @@ public class River extends NearbyFeature {
         this.importance = importance;
     }
 
-    @Override
-    public double computeRisk() {
-        return importance * (1.0 / (1 + distanceM / 200.0));
-    }
-
     public int getImportance() { return importance; }
     public void setImportance(int importance) { this.importance = importance; }
 }

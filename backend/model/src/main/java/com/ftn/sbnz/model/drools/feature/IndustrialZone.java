@@ -10,11 +10,6 @@ public class IndustrialZone extends NearbyFeature {
         this.hazardLevel = hazardLevel;
     }
 
-    @Override
-    public double computeRisk() {
-        return 0.9 * (1.0 / (1 + distanceM / 500.0));
-    }
-
     public String getZoneType() { return zoneType; }
     public void setZoneType(String zoneType) { this.zoneType = zoneType; }
     public int getHazardLevel() { return hazardLevel; }

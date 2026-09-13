@@ -10,11 +10,6 @@ public class School extends NearbyFeature {
         this.type = type;
     }
 
-    @Override
-    public double computeRisk() {
-        return 1.5 * (1.0 / (1 + distanceM / 400.0));
-    }
-
     public int getStudentCount() { return studentCount; }
     public void setStudentCount(int studentCount) { this.studentCount = studentCount; }
     public String getType() { return type; }

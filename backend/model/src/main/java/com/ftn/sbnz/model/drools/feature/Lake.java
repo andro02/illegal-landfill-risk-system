@@ -5,9 +5,4 @@ public class Lake extends NearbyFeature {
     public Lake(String name, double distanceM) {
         super(name, distanceM);
     }
-
-    @Override
-    public double computeRisk() {
-        return 3.0 * (1.0 / (1 + distanceM / 500.0));
-    }
 }

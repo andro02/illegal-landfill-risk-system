@@ -16,7 +16,7 @@ rule "River risk"
     when
         $d : Dumpsite(riskAssessment.riverCalculated == false)
         accumulate(
-            River($risk : computeRisk(), distanceM <= 5000) from $d.nearbyFeatures;
+            River($risk : importance * (1.0 / (1 + distanceM / 200.0)), distanceM <= 5000) from $d.nearbyFeatures;
             $totalRisk : sum($risk),
             $count : count(1)
         )
@@ -33,14 +33,13 @@ end
 rule "Lake risk"
     when
         $d : Dumpsite(riskAssessment.lakeRisk == 0)
-        $l : Lake(distanceM <= 3000) from $d.nearbyFeatures
+        $l : Lake($risk : 3.0 * (1.0 / (1 + distanceM / 500.0)), distanceM <= 3000) from $d.nearbyFeatures
     then
-        double risk = $l.computeRisk();
         modify($d) {
-            getRiskAssessment().setLakeRisk(risk)
+            getRiskAssessment().setLakeRisk($risk)
         }
         $d.getThreatenedWaterBodies().add($l.getName());
-        logger.info("Lake risk = " + risk);
+        logger.info("Lake risk = " + $risk);
 end
 
 rule "Size risk"

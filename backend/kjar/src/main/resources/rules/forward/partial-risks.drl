@@ -16,30 +16,34 @@ rule "River risk"
     when
         $d : Dumpsite(riskAssessment.riverCalculated == false)
         accumulate(
-            River($risk : importance * (1.0 / (1 + distanceM / 200.0)), distanceM <= 5000) from $d.nearbyFeatures;
-            $totalRisk : sum($risk),
-            $count : count(1)
+            $r : River(distanceM <= 5000) from $d.nearbyFeatures;
+            $rivers : collectList($r)
         )
-        eval($count > 0)
+        eval($rivers.size() > 0)
     then
+        double totalRisk = 0;
+        for (Object o : $rivers) {
+            River r = (River) o;
+            totalRisk += r.getImportance() * (1.0 / (1 + r.getDistanceM() / 200.0));
+        }
         modify($d) {
-            getRiskAssessment().setRiverRisk($totalRisk),
+            getRiskAssessment().setRiverRisk(totalRisk),
             getRiskAssessment().setRiverCalculated(true),
             setWaterRiskFlag(true)
         }
-        logger.info("River risk = " + $totalRisk + " (" + $count + " rijeka) for " + $d.getId());
 end
 
 rule "Lake risk"
     when
         $d : Dumpsite(riskAssessment.lakeRisk == 0)
-        $l : Lake($risk : 3.0 * (1.0 / (1 + distanceM / 500.0)), distanceM <= 3000) from $d.nearbyFeatures
+        $l : Lake(distanceM <= 3000) from $d.nearbyFeatures
     then
+        double risk = 3.0 * (1.0 / (1 + $l.getDistanceM() / 500.0));
         modify($d) {
-            getRiskAssessment().setLakeRisk($risk)
+            getRiskAssessment().setLakeRisk(risk)
         }
         $d.getThreatenedWaterBodies().add($l.getName());
-        logger.info("Lake risk = " + $risk);
+        logger.info("Lake risk = " + risk);
 end
 
 rule "Size risk"

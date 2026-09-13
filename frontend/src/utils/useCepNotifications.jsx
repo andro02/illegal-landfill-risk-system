@@ -9,7 +9,9 @@ export function useCepNotifications() {
 
     useEffect(() => {
         const client = new Client({
-            webSocketFactory: () => new SockJS("/ws"),
+            webSocketFactory: () => new SockJS("/stomp-ws", null, {
+                transports: ['xhr-streaming', 'xhr-polling']
+            }),
             reconnectDelay: 5000,
             onConnect: () => {
                 client.subscribe("/topic/cep-notifications", (message) => {

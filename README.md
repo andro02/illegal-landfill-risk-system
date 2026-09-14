@@ -1,9 +1,9 @@
 <h1 align="center">
-  Систем за детекцију и процену ризика дивљих депонија
+  Illegal Landfill Detection and Risk Assessment System
 </h1>
 
 <p align="center">
-  Систем који комбинује детекцију дивљих депонија на ортофото и сателитским снимцима применом машинског учења, са системом заснованим на знању за процену еколошког ризика и подршку одлучивању о санацији.
+  A system that combines illegal landfill detection on orthophoto and satellite imagery using machine learning, with a knowledge-based system for assessing ecological risk and supporting remediation decision-making.
 </p>
 
 <div align="center">
@@ -13,78 +13,78 @@
 ![Drools](https://img.shields.io/badge/Drools-7.49.0-red)
 ![React](https://img.shields.io/badge/React-19-61DAFB)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-PostGIS-336791)
-![status](https://img.shields.io/badge/Status-Завршни%20рад-yellow)
+![status](https://img.shields.io/badge/Status-Thesis%20Project-yellow)
 
 </div>
 
-## О пројекту
+## About the Project
 
-Дивље депоније представљају озбиљан еколошки проблем — њихово откривање теренским инспекцијама је споро и неефикасно, а постојећа решења заснована на машинском учењу третирају сваку детекцију изоловано, без увида у стварни ризик који депонија представља с обзиром на околни контекст.
+Illegal landfills are a serious environmental problem — detecting them through field inspections is slow and inefficient, and existing machine-learning-based solutions treat each detection in isolation, without any insight into the actual risk a landfill poses given its surrounding context.
 
-Овај систем комбинује два модула:
+This system combines two modules:
 
-- 🛰️ **Детекција и сегментација** — модел YOLO11m детектује депоније на ортофото/сателитским снимцима, допуњен SAM моделом за приближну процену површине.
-- 🧠 **Систем заснован на знању (СБНЗ)** — применом Drools платформе, систем на основу географског контекста (близина река, језера, насеља, путева, школа, индустријских зона) процењује ниво ризика сваке депоније, проверава предуслове за санацију, и у реалном времену препознаје обрасце у настајању нових депонија.
+- **Detection and segmentation** — a YOLO11m model detects landfills in orthophoto/satellite imagery, complemented by the SAM model for approximate area estimation.
+- **Knowledge-based system (KBS)** — using the Drools platform, the system assesses the risk level of each landfill based on geographic context (proximity to rivers, lakes, settlements, roads, schools, industrial zones), checks the prerequisites for remediation, and detects emerging landfill patterns in real time.
 
-## Функционалности
+## Features
 
-🔍 Детекција дивљих депонија из ортофото снимака применом YOLO11m модела
+- Detection of illegal landfills from orthophoto imagery using the YOLO11m model
 
-🧩 Приближна процена површине депоније применом SAM сегментације
+- Approximate landfill area estimation using SAM segmentation
 
-📊 Процена запремине, масе отпада и годишње емисије метана (IPCC методологија)
+- Estimation of waste volume, mass, and annual methane emissions (IPCC methodology)
 
-⚖️ Процена нивоа ризика депоније на основу географског контекста (уланчавање правила унапред)
+- Landfill risk level assessment based on geographic context (forward rule chaining)
 
-✅ Провера предуслова потребних за санацију депоније (уланчавање правила уназад)
+- Verification of prerequisites required for landfill remediation (backward rule chaining)
 
-🔔 Обавештавање у реалном времену о новооткривеним обрасцима депонија (обрада сложених догађаја — CEP)
+- Real-time notifications about newly detected landfill patterns (complex event processing — CEP)
 
-🗺️ Интерактивна веб мапа са груписањем маркера, детаљним прегледом депоније и историјом обавештења
+- Interactive web map with marker clustering, detailed landfill overview, and notification history
 
-## Технологије
+## Technologies
 
-**Детекција/сегментација:** Python, Ultralytics YOLO11, Meta AI SAM
+**Detection/segmentation:** Python, Ultralytics YOLO11, Meta AI SAM
 
-**Систем заснован на знању:** Drools (forward/backward chaining, CEP, rule templates)
+**Knowledge-based system:** Drools (forward/backward chaining, CEP, rule templates)
 
-**Бекенд:** Java 11, Spring Boot 2.7.9, Spring Data JPA, WebSocket (STOMP)
+**Backend:** Java 11, Spring Boot 2.7.9, Spring Data JPA, WebSocket (STOMP)
 
-**База података:** PostgreSQL + PostGIS
+**Database:** PostgreSQL + PostGIS
 
-**Фронтенд:** React, Leaflet (react-leaflet, leaflet.markercluster), @stomp/stompjs
+**Frontend:** React, Leaflet (react-leaflet, leaflet.markercluster), @stomp/stompjs
 
-## Структура пројекта
+## Project Structure
 
 ```
 📦 root
- ┣ 📂 model    — доменски ентитети и Drools чињенице
- ┣ 📂 kjar     — база знања (DRL правила, шаблони, CEP)
- ┣ 📂 service  — Spring Boot REST/WebSocket сервисни слој
- ┗ 📂 frontend — React апликација (мапа, инфо-панел, CEP нотификације)
+ ┣ 📂 model    — domain entities and Drools facts
+ ┣ 📂 kjar     — knowledge base (DRL rules, templates, CEP)
+ ┣ 📂 service  — Spring Boot REST/WebSocket service layer
+ ┗ 📂 frontend — React application (map, info panel, CEP notifications)
 ```
 
-## Покретање пројекта
+## Running the Project
 
-### Предуслови
+### Prerequisites
 
 - Java 11
 - Node.js
-- PostgreSQL са PostGIS проширењем
+- PostgreSQL with the PostGIS extension
 - Maven
 
-### Бекенд
+### Backend
 
 ```bash
-# Из root direktorijuma, izgraditi module redosledom: model -> kjar -> service
+# From the root directory, build the modules in order: model -> kjar -> service
 cd model && mvn clean install
 cd ../kjar && mvn clean install
 cd ../service && mvn spring-boot:run
 ```
 
-Подеси конекцију ка бази података у `service/src/main/resources/application.properties` (или `.env` фајлу, пошто пројекат користи `spring-dotenv`).
+Configure the database connection in `service/src/main/resources/application.properties` (or a `.env` file, since the project uses `spring-dotenv`).
 
-### Фронтенд
+### Frontend
 
 ```bash
 cd frontend
@@ -92,10 +92,10 @@ npm install
 npm start
 ```
 
-Апликација ће бити доступна на `http://localhost:3000`, а бекенд на `http://localhost:8080`.
+The application will be available at `http://localhost:3000`, with the backend running at `http://localhost:8080`.
 
-## Аутор
+## Author
 
-Андрија Словић — завршни рад, Факултет техничких наука, Универзитет у Новом Саду, Софтверско инжењерство и информационе технологије, 2026.
+Andrija Slović — final thesis, Faculty of Technical Sciences, University of Novi Sad, Software Engineering and Information Technologies, 2026.
 
-Ментор: доц. др Синиша Николић
+Mentor: Assist. Prof. Siniša Nikolić, PhD

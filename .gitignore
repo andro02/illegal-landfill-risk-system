@@ -1,2 +1,4 @@
 .env
 dataset/
+# local data mounted into the containers (database dump, landfill images)
+data/

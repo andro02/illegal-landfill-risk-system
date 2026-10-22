@@ -1,0 +1,26 @@
+# SITE_ADDRESS is "http://localhost" for local runs and a host name such as
+# "130-61-12-34.sslip.io" on the server, where Caddy obtains HTTPS automatically
+{$SITE_ADDRESS:http://localhost} {
+	encode zstd gzip
+
+	# Spring Boot: REST API and the WebSocket endpoint for CEP notifications
+	handle /api/* {
+		reverse_proxy backend:8080
+	}
+	handle /stomp-ws* {
+		reverse_proxy backend:8080
+	}
+
+	# landfill images, mounted from the host
+	handle /images/* {
+		root * /srv
+		file_server
+	}
+
+	# React application; unknown paths fall back to index.html
+	handle {
+		root * /srv/app
+		try_files {path} /index.html
+		file_server
+	}
+}

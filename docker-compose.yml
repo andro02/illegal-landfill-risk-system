@@ -1,0 +1,54 @@
+# Runs the whole system: PostGIS database, Spring Boot + Drools backend and
+# the React frontend behind Caddy. Configuration comes from the .env file.
+
+services:
+  db:
+    build:
+      context: ./deploy/db
+      args:
+        PG_MAJOR: ${PG_MAJOR:-17}
+    environment:
+      POSTGRES_DB: sbnz
+      POSTGRES_USER: sbnz
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./data/landfills.dump:/dump/landfills.dump:ro
+    healthcheck:
+      # checks over TCP, which only succeeds after the initial restore finished
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U sbnz -d sbnz"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/sbnz
+      DB_USERNAME: sbnz
+      DB_PASSWORD: ${DB_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-http://localhost}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./data/images:/srv/images:ro
+      - caddy-data:/data
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  db-data:
+  caddy-data:

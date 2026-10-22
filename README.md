@@ -94,6 +94,23 @@ npm start
 
 The application will be available at `http://localhost:3000`, with the backend running at `http://localhost:8080`.
 
+### Running with Docker
+
+The whole system (PostGIS, backend and frontend behind Caddy) can be started with Docker Compose. The database dump and the landfill images are not part of the repository and are expected in a local `data/` folder:
+
+```
+data/
+├── landfills.dump        # pg_dump -F c of the application tables
+└── images/landfills/     # landfill images (*.jpg)
+```
+
+```bash
+cp .env.example .env      # then set DB_PASSWORD (and PG_MAJOR if needed)
+docker compose up -d --build
+```
+
+The application is then available at `http://localhost`. On the first start the database is created and the dump restored, which takes a few minutes.
+
 ## Author
 
 Andrija Slović — final thesis, Faculty of Technical Sciences, University of Novi Sad, Software Engineering and Information Technologies, 2026.

@@ -2,7 +2,7 @@ import "../css/Logo.css"
 
 function Logo() {
     return <div className="logo">
-        <img src="/logo.png" />
+        <img src="/logo.png" alt="" />
         <p> NATIONAL<br />LANDFILL<br />WATCH </p>
     </div>
 }

@@ -30,7 +30,9 @@
     .info-panel {
         top: 0;
         right: 0;
-        width: 512px;
+        /* at most a bit over half the width, so the map stays visible when
+           the app is shown in a smaller window (e.g. embedded in a page) */
+        width: min(512px, 55%);
         height: 100%;
         transform: translateX(100%);
     }
@@ -44,15 +46,26 @@
         left: 0;
         bottom: 0;
         width: 100%;
-        height: 60%;
+        height: 75%;
         transform: translateY(100%);
     }
     .info-panel.open {
         transform: translateY(0);
     }
-    .info-panel-details#landfill  { max-height: 20vh; }
-    .info-panel-details#serbia    { max-height: 50vh; }
-    .info-panel-details#info      { max-height: 35vh; }
+    /* on small screens the image and the details scroll together: the image
+       alone can be as tall as the panel, which left no room for the details */
+    .info-panel-content {
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+    .info-panel-content > .info-panel-image {
+        flex-shrink: 0;
+    }
+    .info-panel-content > .info-panel-details {
+        flex: none;
+        max-height: none;
+        overflow: visible;
+    }
 }
 
 .info-panel-details {

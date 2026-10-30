@@ -18,7 +18,7 @@ function InfoPanel({ open, onClose, title, actions, children }) {
 
       <div className="info-panel-main">
         <h2 className="info-panel-title">
-          <img className="info-panel-logo" src="/logo.png" />
+          <img className="info-panel-logo" src="/logo.png" alt="" />
           {title}
         </h2>
 

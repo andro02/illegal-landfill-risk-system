@@ -3,6 +3,7 @@ package com.ftn.sbnz.service.simulator;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -22,15 +23,23 @@ public class DumpsiteDetectionSimulator {
         this.landfillRepository = landfillRepository;
     }
 
-    @Scheduled(fixedRate = 30000) // svakih 30 sekundi
+    // one simulated detection a day (simulator.detection-interval in
+    // application.properties), so visitors aren't flooded with notifications;
+    // the first one comes a couple of minutes after startup
+    @Scheduled(
+        fixedRateString = "${simulator.detection-interval:PT24H}",
+        initialDelayString = "${simulator.initial-delay:PT2M}"
+    )
     public void simulateDetection() {
 
-        List<Landfill> landfills = landfillRepository.findAll();
-        if (landfills.isEmpty()) return;
+        // one random landfill, read on its own instead of loading all of them
+        long count = landfillRepository.count();
+        if (count == 0) return;
 
-        Landfill random = landfills.get(
-            ThreadLocalRandom.current().nextInt(landfills.size())
-        );
+        int index = (int) ThreadLocalRandom.current().nextLong(count);
+        Landfill random = landfillRepository.findAll(PageRequest.of(index, 1))
+            .getContent()
+            .get(0);
 
         List<String> regions = List.of(
             "Novi Sad",

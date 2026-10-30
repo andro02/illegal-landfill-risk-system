@@ -48,6 +48,12 @@ public class DumpsiteRiskService {
     private KieContainer kieContainer;
     private KieSession cepSession;
 
+    // decision table for logistics orders and the rules compiled from it with
+    // the template; compiling rules is slow, so it is done once at startup
+    // instead of on every evaluation
+    private List<Map<String, Object>> logisticsRows;
+    private KieBase logisticsKieBase;
+
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
@@ -56,6 +62,19 @@ public class DumpsiteRiskService {
         KieServices ks = KieServices.Factory.get();
         kieContainer = ks.getKieClasspathContainer();
         cepSession = kieContainer.newKieSession("cepKsession");
+
+        // the rules are compiled the first time a knowledge base is used; doing
+        // it here keeps the first visitor's evaluation from waiting for it
+        kieContainer.getKieBase("forwardKbase");
+        kieContainer.getKieBase("backwardKbase");
+
+        logisticsRows = logisticsTable();
+        InputStream templateStream = getClass().getResourceAsStream(
+                "/rules/template/logistics-template.drt");
+        String drl = new ObjectDataCompiler().compile(logisticsRows, templateStream);
+        KieHelper helper = new KieHelper();
+        helper.addContent(drl, ResourceType.DRL);
+        logisticsKieBase = helper.build();
     }
 
     @PreDestroy
@@ -172,7 +191,8 @@ public class DumpsiteRiskService {
         return new PrerequisiteResult(allPrerequisites, missing);
     }
 
-    public LogisticsOrder generateLogisticsOrder(Dumpsite dumpsite) {
+    // rows of the decision table the logistics rules are generated from
+    private static List<Map<String, Object>> logisticsTable() {
         List<Map<String, Object>> rows = new ArrayList<>();
 
         Map<String, Object> r1 = new HashMap<>();
@@ -217,15 +237,12 @@ public class DumpsiteRiskService {
         r6.put("Preduslovi", List.of("TraktorDostupan", "PristupniPut", "MinimalniBudzet", "DozvolaOpstine"));
         rows.add(r6);
 
-        InputStream templateStream = getClass().getResourceAsStream(
-                "/rules/template/logistics-template.drt");
-        ObjectDataCompiler compiler = new ObjectDataCompiler();
-        String drl = compiler.compile(rows, templateStream);
+        return rows;
+    }
 
-        KieHelper helper = new KieHelper();
-        helper.addContent(drl, ResourceType.DRL);
-        KieBase kieBase = helper.build();
-        KieSession templateSession = kieBase.newKieSession();
+    public LogisticsOrder generateLogisticsOrder(Dumpsite dumpsite) {
+        List<Map<String, Object>> rows = logisticsRows;
+        KieSession templateSession = logisticsKieBase.newKieSession();
 
         templateSession.insert(dumpsite);
         templateSession.fireAllRules();

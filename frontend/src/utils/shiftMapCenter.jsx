@@ -12,7 +12,7 @@ export function shiftMapCenter(map, panelOpen, layersOpen, center, zoom) {
     // (see InfoPanel.css)
     const size = map.getSize();
     const narrow = size.x < 640;
-    const panelWidth = Math.min(512, size.x * 0.55);
+    const panelWidth = Math.min(512, Math.max(340, size.x * 0.42));
     const offsetX = (panelOpen && !narrow ? panelWidth * 0.58 : 0) + (layersOpen ? -200 : 0);
     const offsetY = panelOpen && narrow ? size.y * 0.75 / 2 : 0;
     const baseZoom = zoom ?? map.getZoom();
